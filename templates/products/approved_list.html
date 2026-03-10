@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="hero">
+    <h1>Approved Products</h1>
+    <p>Search, filter by date, and control pagination. Only approved items appear here.</p>
+</div>
+
+<section class="card">
+    <form method="get" class="form-row">
+        <div class="two-col">
+            <div>
+                {{ form.q.label_tag }}
+                {{ form.q }}
+            </div>
+            <div>
+                {{ form.start_date.label_tag }}
+                {{ form.start_date }}
+            </div>
+            <div>
+                {{ form.end_date.label_tag }}
+                {{ form.end_date }}
+            </div>
+            <div>
+                {{ form.per_page.label_tag }}
+                {{ form.per_page }}
+            </div>
+        </div>
+        <div class="actions">
+            <button class="btn" type="submit">Apply Filters</button>
+            <a class="btn secondary" href="{% url 'products:approved_products' %}">Reset</a>
+        </div>
+    </form>
+</section>
+
+<section class="card">
+    <div class="actions">
+        <span><strong>Total Approved:</strong> {{ page_obj.paginator.count }}</span>
+        <a class="btn secondary" href="{% url 'products:draft_upload' %}">Back to Drafts</a>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Product ID</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Last Updated</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in page_obj %}
+                <tr>
+                    <td>{{ product.product_id }}</td>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.category }}</td>
+                    <td>{{ product.price }}</td>
+                    <td>{{ product.quantity }}</td>
+                    <td>{{ product.last_updated|date:'Y-m-d H:i' }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6">No approved products yet.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">Previous</a>
+        {% endif %}
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">Next</a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="hero">
+    <h1>Draft Products</h1>
+    <p>Upload an Excel file to create or update product drafts. Use the approve button to move items into the approved list.</p>
+</div>
+
+<div class="grid">
+    <section class="card">
+        <h2>Upload Excel</h2>
+        <form method="post" enctype="multipart/form-data" class="form-row">
+            {% csrf_token %}
+            {{ upload_form.file.label_tag }}
+            {{ upload_form.file }}
+            <button class="btn" type="submit">Upload</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <div class="actions">
+            <span><strong>Total Drafts:</strong> {{ page_obj.paginator.count }}</span>
+            <a class="btn secondary" href="{% url 'products:approved_products' %}">Go to Approved</a>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product ID</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Last Updated</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in page_obj %}
+                    <tr class="{% if product.product_id in updated_ids %}highlight{% endif %}">
+                        <td>{{ product.product_id }}</td>
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.category }}</td>
+                        <td>{{ product.price }}</td>
+                        <td>{{ product.quantity }}</td>
+                        <td>{{ product.last_updated|date:'Y-m-d H:i' }}</td>
+                        <td>
+                            <form method="post" action="{% url 'products:approve_product' product.product_id %}" class="inline">
+                                {% csrf_token %}
+                                <button class="btn" type="submit">Approve</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7">No drafts yet. Upload an Excel file to begin.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            {% endif %}
+            <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">Next</a>
+            {% endif %}
+        </div>
+    </section>
+</div>
+{% endblock %}
